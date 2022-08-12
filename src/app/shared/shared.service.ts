@@ -12,9 +12,11 @@ export class SharedService {
 
   getLocation(lat?: number , lng?: number) {
     if (lat && lng) {
+      console.log(lat , lng);
       this.latitude.next(lat);
       this.longitude.next(lng);
     } else {
+      console.log('else');
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
           const longitude = position.coords.longitude;
