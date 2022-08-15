@@ -10,9 +10,14 @@
         <input type="text" class="form-control" [formControl]="latitudeController" >
       </div>
     </div>
-    <div class="d-flex justify-content-center mt-3">
+    <div class="d-flex justify-content-between mt-3">
+      <div class="d-flex align-items-center">
+        <input type="checkbox" class="form-check" id="read-only" [formControl]="readOnlyController" >
+        <label class="mx-1" for="read-only">Read only</label>
+      </div>
       <button type="submit" class="submit-btn">Submit</button>
     </div>
   </form>
-  <app-map #childComponent></app-map>
+  <div id="map" #map (click)="onChangeLocation()" ></div>
+  <!--  <app-map #childComponent ></app-map>-->
 </div>

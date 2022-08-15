@@ -9,48 +9,43 @@ import {SharedService} from "../shared.service";
 })
 export class MapComponent implements AfterViewInit {
 
-  private map: any;
-  lat: number = 29.6042;
-  lng: number = 52.5644;
+  public map: any;
+  lat: any = 29.6042;
+  lng: any = 52.5644;
   marker: any;
   circle: any;
-  // @Input() lat: number = 29.6042;
-  // @Input() lng: number = 52.5375;
+  // @Input() latitude: number = 29.6042;
+  // @Input() longitude: number = 52.5375;
   constructor(private sharedService: SharedService) {
-    this.sharedService.longitude.subscribe(lng => {
-      this.lng = lng;
-    });
-    this.sharedService.latitude.subscribe(lat => {
-      this.lat = lat;
-    });
   }
 
   ngAfterViewInit(): void {
-    if (this.lat !== 0 && this.lng !== 0) {
-      this.initMap();
-    } else {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-          // const longitude = position.coords.longitude;
-          // const latitude = position.coords.latitude;
-          this.lat = position.coords.latitude ;
-          this.lng = position.coords.longitude;
-          this.initMap();
-        });
-      } else {
-        alert('No support for geolocation');
-      }
+    if (this.map) {
+      this.map.off();
+      this.map.remove();
     }
-    console.log(this.lat);
+    this.sharedService.latitude.subscribe(lat => {
+      if (lat !== 0) {
+        this.lat = lat;
+      }
+    });
+    this.sharedService.longitude.subscribe(lng => {
+      if (lng !== 0) {
+        this.lng = lng;
+      }
+    });
+    this.initMap();
   }
 
   initMap() {
+    console.log(this.lat , this.lng);
     this.map = L.map('map').setView([this.lat , this.lng], 6);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 22,
       attribution:
         '&copy;<a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>"',
     }).addTo(this.map);
+    this.map.invalidateSize();
     this.marker = L.marker([this.lat , this.lng]);
     this.circle = L.circle([this.lat , this.lng], {radius: 200});
     this.map.addLayer(this.marker);
@@ -63,6 +58,7 @@ export class MapComponent implements AfterViewInit {
   }
 
   flyTo() {
+    console.log(this.lat , this.lng);
     L.latLng(this.lat, this.lng);
     this.map.removeLayer(this.marker);
     this.map.removeLayer(this.circle);
