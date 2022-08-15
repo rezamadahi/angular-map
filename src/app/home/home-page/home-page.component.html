@@ -12,12 +12,11 @@
     </div>
     <div class="d-flex justify-content-between mt-3">
       <div class="d-flex align-items-center">
-        <input type="checkbox" class="form-check" id="read-only" [formControl]="readOnlyController" >
+        <input type="checkbox" class="form-check" id="read-only" [formControl]="readOnlyController" (change)="onChangeReadOnly()" >
         <label class="mx-1" for="read-only">Read only</label>
       </div>
       <button type="submit" class="submit-btn">Submit</button>
     </div>
   </form>
-  <div id="map" #map (click)="onChangeLocation()" ></div>
-  <!--  <app-map #childComponent ></app-map>-->
+  <app-map #childComponent [readOnly]="readOnly" ></app-map>
 </div>

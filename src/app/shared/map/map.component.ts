@@ -1,6 +1,22 @@
 import {AfterViewInit, Component, Input} from '@angular/core';
-import * as L from 'leaflet';
 import {SharedService} from "../shared.service";
+import * as L from 'leaflet';
+import Swal from 'sweetalert2';
+
+const iconRetinaUrl = './assets/marker-icon-2x.png';
+const iconUrl = './assets/marker-icon.png';
+const shadowUrl = './assets/marker-shadow.png';
+const iconDefault = L.icon({
+  iconRetinaUrl,
+  iconUrl,
+  shadowUrl,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  tooltipAnchor: [16, -28],
+  shadowSize: [41, 41]
+});
+L.Marker.prototype.options.icon = iconDefault;
 
 @Component({
   selector: 'app-map',
@@ -8,69 +24,98 @@ import {SharedService} from "../shared.service";
   styleUrls: ['./map.component.scss']
 })
 export class MapComponent implements AfterViewInit {
-
-  public map: any;
-  lat: any = 29.6042;
-  lng: any = 52.5644;
+  latitude: number = 29.5445;
+  longitude: number = 52.6544;
   marker: any;
   circle: any;
-  // @Input() latitude: number = 29.6042;
-  // @Input() longitude: number = 52.5375;
+  public map: any;
+  @Input() readOnly: boolean = false;
   constructor(private sharedService: SharedService) {
   }
 
   ngAfterViewInit(): void {
+    navigator.geolocation.getCurrentPosition((position) => {
+      if (position.coords.latitude !== 0 && position.coords.longitude !== 0 ) {
+        this.latitude = position.coords.latitude;
+        this.longitude = position.coords.latitude;
+      } else {
+        this.latitude = 29.5445;
+        this.longitude = 52.6544;
+      }
+      this.initMap();
+      this.sharedService.latLng.subscribe(latLng => {
+        this.latitude = latLng[0];
+        this.longitude = latLng[1];
+        setTimeout(() => {
+          this.changeConfig();
+        },10)
+      })
+    });
+  }
+
+  initMap() {
     if (this.map) {
       this.map.off();
       this.map.remove();
     }
-    this.sharedService.latitude.subscribe(lat => {
-      if (lat !== 0) {
-        this.lat = lat;
-      }
+    this.map = L.map('map', {
+      center: [this.latitude, this.longitude],
+      zoom: 10,
+      attributionControl: false,
     });
-    this.sharedService.longitude.subscribe(lng => {
-      if (lng !== 0) {
-        this.lng = lng;
-      }
-    });
-    this.initMap();
-  }
-
-  initMap() {
-    console.log(this.lat , this.lng);
-    this.map = L.map('map').setView([this.lat , this.lng], 6);
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 22,
       attribution:
         '&copy;<a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>"',
     }).addTo(this.map);
+    this.changeConfig();
     this.map.invalidateSize();
-    this.marker = L.marker([this.lat , this.lng]);
-    this.circle = L.circle([this.lat , this.lng], {radius: 200});
-    this.map.addLayer(this.marker);
-    this.map.addLayer(this.circle);
-    L.popup()
-      .setLatLng([this.lat, this.lng])
-      .setContent('<p>Hello world!<br />This is a nice popup.</p>')
-      .openOn(this.map);
-    this.map.flyTo([this.lat , this.lng] , 6);
   }
 
-  flyTo() {
-    console.log(this.lat , this.lng);
-    L.latLng(this.lat, this.lng);
-    this.map.removeLayer(this.marker);
-    this.map.removeLayer(this.circle);
-    this.marker = L.marker([this.lat , this.lng]);
-    this.circle = L.circle([this.lat , this.lng], {radius: 200});
+  changeConfig() {
+    this.marker = L.marker([this.latitude , this.longitude] , {draggable: true});
+    this.circle = L.circle([this.latitude , this.longitude], {radius: 50});
     this.map.addLayer(this.marker);
     this.map.addLayer(this.circle);
     L.popup()
-      .setLatLng([this.lat, this.lng])
+      .setLatLng([this.latitude, this.longitude])
       .setContent('<p>Hello world!<br />This is a nice popup.</p>')
       .openOn(this.map);
-    this.map.flyTo([this.lat , this.lng] , 12);
+  }
+
+  onChangeLocation() {
+    this.map.on('click', (e:any) => {
+      if (!this.readOnly) {
+        Swal.fire({
+          title: 'Are you sure?',
+          text: '',
+          icon: 'success',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          cancelButtonText: 'Cancel',
+          confirmButtonText: 'Confirm',
+        }).then(result => {
+          if (result.isConfirmed) {
+            let coord = e.latlng;
+            this.sharedService.latLng.next([coord.lat , coord.lng]);
+            this.map.removeLayer(this.marker);
+            this.map.removeLayer(this.circle);
+            this.map.flyTo([this.latitude , this.longitude] , 15);
+          }
+          else {
+            return;
+          }
+        });
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.map) {
+      this.map.off();
+      this.map.remove();
+    }
   }
 
 }

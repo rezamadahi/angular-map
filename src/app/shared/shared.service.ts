@@ -6,14 +6,7 @@ import {BehaviorSubject} from "rxjs";
 })
 export class SharedService {
 
-  latitude = new BehaviorSubject<number>(0);
-  longitude = new BehaviorSubject<number>(0);
+  latLng = new BehaviorSubject<number[]>([29.5445,52.6544]);
   constructor() {}
 
-  // getLocation(lat?: number , lng?: number) {
-  //   if (lat && lng) {
-  //     this.latitude.next(lat);
-  //     this.longitude.next(lng);
-  //   }
-  // }
 }
