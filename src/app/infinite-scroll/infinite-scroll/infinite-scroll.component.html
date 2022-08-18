@@ -1,0 +1,15 @@
+<main class="container py-4">
+  <div class="form-box">
+    <mat-form-field appearance="fill">
+      <mat-label>Select an option</mat-label>
+      <mat-select (appScroll)="addMoreElement()" >
+        <mat-option
+          *ngFor="let i of arr; let index = index"
+          [value] = "index"
+        >{{ i }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+<!--    <mat-spinner *ngIf="isPendingData" [diameter]="50" ></mat-spinner>-->
+  </div>
+</main>

@@ -5,6 +5,10 @@ const routes: Routes = [
   {
     path: '',
     loadChildren: () => import('./home/home.module').then((m) =>  m.HomeModule ),
+  },
+  {
+    path: 'infinite-scroll',
+    loadChildren: () => import('./infinite-scroll/infinite-scroll.module').then((m) => m.InfiniteScrollModule)
   }
 ];
 
